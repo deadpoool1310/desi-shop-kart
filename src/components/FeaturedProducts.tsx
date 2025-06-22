@@ -73,7 +73,7 @@ const FeaturedProducts = () => {
             Featured Products
           </h2>
           <p className="text-gray-600 text-lg">
-            Handpicked products just for you
+            Save money. Live better. Quality products at everyday low prices.
           </p>
         </div>
 
