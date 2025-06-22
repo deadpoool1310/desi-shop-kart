@@ -143,13 +143,13 @@ const ProductListing = () => {
             <div className="flex bg-white rounded-lg p-1 shadow-sm">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-orange-500 text-white' : 'text-gray-600'}`}
+                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}
               >
                 <Grid className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'text-gray-600'}`}
+                className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}
               >
                 <List className="h-4 w-4" />
               </button>
@@ -159,7 +159,7 @@ const ProductListing = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
               <option value="name">Sort by Name</option>
               <option value="price-low">Price: Low to High</option>
@@ -193,7 +193,7 @@ const ProductListing = () => {
                       type="checkbox"
                       checked={selectedBrands.includes(brand)}
                       onChange={() => handleBrandChange(brand)}
-                      className="mr-2 text-orange-500 focus:ring-orange-500"
+                      className="mr-2 text-blue-600 focus:ring-blue-600"
                     />
                     <span className="text-sm text-gray-600">{brand}</span>
                   </label>
@@ -211,7 +211,7 @@ const ProductListing = () => {
                       type="checkbox"
                       checked={selectedCategories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
-                      className="mr-2 text-orange-500 focus:ring-orange-500"
+                      className="mr-2 text-blue-600 focus:ring-blue-600"
                     />
                     <span className="text-sm text-gray-600">{category}</span>
                   </label>
@@ -225,7 +225,7 @@ const ProductListing = () => {
                 setSelectedBrands([]);
                 setSelectedCategories([]);
               }}
-              className="text-orange-500 text-sm hover:underline"
+              className="text-blue-600 text-sm hover:underline"
             >
               Clear All Filters
             </button>

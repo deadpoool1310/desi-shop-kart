@@ -122,7 +122,7 @@ const Login = () => {
                 
                 <Button
                   type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                   disabled={loading}
                 >
                   {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
@@ -135,7 +135,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setIsLogin(!isLogin)}
-                    className="ml-1 text-orange-500 hover:underline"
+                    className="ml-1 text-blue-600 hover:underline"
                   >
                     {isLogin ? 'Sign up' : 'Sign in'}
                   </button>

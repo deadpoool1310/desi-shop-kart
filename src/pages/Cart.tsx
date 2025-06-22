@@ -64,7 +64,7 @@ const Cart = () => {
           <ShoppingBag className="h-24 w-24 mx-auto text-gray-400 mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Please Login</h2>
           <p className="text-gray-600 mb-8">You need to login to view your cart</p>
-          <Button onClick={() => navigate('/login')} className="bg-orange-500 hover:bg-orange-600">
+          <Button onClick={() => navigate('/login')} className="bg-blue-600 hover:bg-blue-700">
             Login Now
           </Button>
         </div>
@@ -81,7 +81,7 @@ const Cart = () => {
           <ShoppingBag className="h-24 w-24 mx-auto text-gray-400 mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
           <p className="text-gray-600 mb-8">Add some products to get started</p>
-          <Button onClick={() => navigate('/products')} className="bg-orange-500 hover:bg-orange-600">
+          <Button onClick={() => navigate('/products')} className="bg-blue-600 hover:bg-blue-700">
             Continue Shopping
           </Button>
         </div>
@@ -177,7 +177,7 @@ const Cart = () => {
               
               <Button 
                 onClick={handleCheckout}
-                className="w-full bg-orange-500 hover:bg-orange-600"
+                className="w-full bg-blue-600 hover:bg-blue-700"
                 size="lg"
               >
                 Proceed to Checkout
