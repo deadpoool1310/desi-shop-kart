@@ -1,17 +1,18 @@
 
 import React, { useState } from 'react';
 import { Heart, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
-  originalPrice: number;
+  original_price?: number;
   image: string;
   rating: number;
-  reviews: number;
+  reviews_count: number;
   brand: string;
-  discount: number;
+  discount_percentage?: number;
 }
 
 interface ProductCardProps {
@@ -20,6 +21,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const { addToCart } = useCart();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -50,6 +52,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return stars;
   };
 
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await addToCart(product.id);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 group overflow-hidden">
       <div className="relative">
@@ -68,9 +76,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             }`}
           />
         </button>
-        {product.discount > 0 && (
+        {product.discount_percentage && product.discount_percentage > 0 && (
           <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
-            {product.discount}% OFF
+            {product.discount_percentage}% OFF
           </div>
         )}
       </div>
@@ -86,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {renderStars(product.rating)}
           </div>
           <span className="text-sm text-gray-500 ml-2">
-            {product.rating} ({product.reviews.toLocaleString('en-IN')})
+            {product.rating} ({product.reviews_count.toLocaleString('en-IN')})
           </span>
         </div>
 
@@ -95,15 +103,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="text-lg font-bold text-gray-800">
               {formatPrice(product.price)}
             </span>
-            {product.originalPrice > product.price && (
+            {product.original_price && product.original_price > product.price && (
               <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
+                {formatPrice(product.original_price)}
               </span>
             )}
           </div>
         </div>
 
-        <button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:shadow-lg transition-shadow flex items-center justify-center space-x-2">
+        <button 
+          onClick={handleAddToCart}
+          className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:shadow-lg transition-shadow flex items-center justify-center space-x-2"
+        >
           <ShoppingCart className="h-4 w-4" />
           <span>Add to Cart</span>
         </button>

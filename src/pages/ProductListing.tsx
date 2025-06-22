@@ -1,93 +1,87 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { ChevronDown, Filter, Grid, List } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
-const products = [
-  {
-    id: 1,
-    name: 'Redmi Note 13 Pro 5G',
-    price: 23999,
-    originalPrice: 26999,
-    image: '/placeholder.svg',
-    rating: 4.3,
-    reviews: 1250,
-    brand: 'Xiaomi',
-    discount: 11
-  },
-  {
-    id: 2,
-    name: 'Samsung Galaxy M34',
-    price: 18999,
-    originalPrice: 22999,
-    image: '/placeholder.svg',
-    rating: 4.1,
-    reviews: 890,
-    brand: 'Samsung',
-    discount: 17
-  },
-  {
-    id: 3,
-    name: 'OnePlus Nord CE 3',
-    price: 26999,
-    originalPrice: 29999,
-    image: '/placeholder.svg',
-    rating: 4.2,
-    reviews: 650,
-    brand: 'OnePlus',
-    discount: 10
-  },
-  {
-    id: 4,
-    name: 'Realme 11 Pro',
-    price: 25999,
-    originalPrice: 28999,
-    image: '/placeholder.svg',
-    rating: 4.0,
-    reviews: 445,
-    brand: 'Realme',
-    discount: 10
-  },
-  {
-    id: 5,
-    name: 'Vivo V29e',
-    price: 28999,
-    originalPrice: 31999,
-    image: '/placeholder.svg',
-    rating: 4.1,
-    reviews: 320,
-    brand: 'Vivo',
-    discount: 9
-  },
-  {
-    id: 6,
-    name: 'Oppo Reno 10',
-    price: 32999,
-    originalPrice: 35999,
-    image: '/placeholder.svg',
-    rating: 4.2,
-    reviews: 280,
-    brand: 'Oppo',
-    discount: 8
-  }
-];
-
-const brands = ['Xiaomi', 'Samsung', 'OnePlus', 'Realme', 'Vivo', 'Oppo'];
-const priceRanges = [
-  { label: 'Under ₹15,000', min: 0, max: 15000 },
-  { label: '₹15,000 - ₹25,000', min: 15000, max: 25000 },
-  { label: '₹25,000 - ₹35,000', min: 25000, max: 35000 },
-  { label: 'Above ₹35,000', min: 35000, max: Infinity }
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  original_price?: number;
+  image: string;
+  rating: number;
+  reviews_count: number;
+  brand: string;
+  discount_percentage?: number;
+  category: string;
+}
 
 const ProductListing = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
-  const [sortBy, setSortBy] = useState('popularity');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+
+  const brands = ['Xiaomi', 'Samsung', 'OnePlus', 'boAt', 'Prestige', 'Fabindia', 'Tata', 'Amul', 'Nike'];
+  const categories = ['Electronics', 'Home & Kitchen', 'Fashion', 'Groceries'];
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*');
+
+        if (error) throw error;
+        setProducts(data || []);
+        setFilteredProducts(data || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    let filtered = products;
+
+    // Filter by brands
+    if (selectedBrands.length > 0) {
+      filtered = filtered.filter(product => selectedBrands.includes(product.brand));
+    }
+
+    // Filter by categories
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(product => selectedCategories.includes(product.category));
+    }
+
+    // Sort products
+    switch (sortBy) {
+      case 'price-low':
+        filtered = [...filtered].sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered = [...filtered].sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    setFilteredProducts(filtered);
+  }, [products, selectedBrands, selectedCategories, sortBy]);
 
   const handleBrandChange = (brand: string) => {
     setSelectedBrands(prev =>
@@ -97,28 +91,47 @@ const ProductListing = () => {
     );
   };
 
-  const filteredProducts = products.filter(product => {
-    if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
-      return false;
-    }
-    return true;
-  });
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-6">
+          <div className="animate-pulse">
+            <div className="bg-gray-300 h-8 rounded mb-4 w-1/3"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl shadow-md p-4">
+                  <div className="bg-gray-300 h-48 rounded-lg mb-4"></div>
+                  <div className="bg-gray-300 h-4 rounded mb-2"></div>
+                  <div className="bg-gray-300 h-4 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
       <div className="container mx-auto px-4 py-6">
-        {/* Breadcrumb */}
-        <div className="text-sm text-gray-600 mb-4">
-          Home &gt; Electronics &gt; Mobiles
-        </div>
-
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-              Smartphones
+              All Products
             </h1>
             <p className="text-gray-600">
               Showing {filteredProducts.length} of {products.length} products
@@ -143,19 +156,16 @@ const ProductListing = () => {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="popularity">Sort by Popularity</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Customer Rating</option>
-                <option value="newest">Newest First</option>
-              </select>
-            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="rating">Customer Rating</option>
+            </select>
 
             {/* Mobile Filter Button */}
             <button
@@ -191,21 +201,19 @@ const ProductListing = () => {
               </div>
             </div>
 
-            {/* Price Filter */}
+            {/* Category Filter */}
             <div className="mb-6">
-              <h4 className="font-medium text-gray-700 mb-3">Price Range</h4>
+              <h4 className="font-medium text-gray-700 mb-3">Category</h4>
               <div className="space-y-2">
-                {priceRanges.map(range => (
-                  <label key={range.label} className="flex items-center">
+                {categories.map(category => (
+                  <label key={category} className="flex items-center">
                     <input
-                      type="radio"
-                      name="priceRange"
-                      value={range.label}
-                      checked={selectedPriceRange === range.label}
-                      onChange={(e) => setSelectedPriceRange(e.target.value)}
+                      type="checkbox"
+                      checked={selectedCategories.includes(category)}
+                      onChange={() => handleCategoryChange(category)}
                       className="mr-2 text-orange-500 focus:ring-orange-500"
                     />
-                    <span className="text-sm text-gray-600">{range.label}</span>
+                    <span className="text-sm text-gray-600">{category}</span>
                   </label>
                 ))}
               </div>
@@ -215,7 +223,7 @@ const ProductListing = () => {
             <button
               onClick={() => {
                 setSelectedBrands([]);
-                setSelectedPriceRange('');
+                setSelectedCategories([]);
               }}
               className="text-orange-500 text-sm hover:underline"
             >
@@ -229,17 +237,6 @@ const ProductListing = () => {
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-12">
-              <div className="flex space-x-2">
-                <button className="px-3 py-2 text-gray-600 hover:text-orange-500">Previous</button>
-                <button className="px-3 py-2 bg-orange-500 text-white rounded">1</button>
-                <button className="px-3 py-2 text-gray-600 hover:text-orange-500">2</button>
-                <button className="px-3 py-2 text-gray-600 hover:text-orange-500">3</button>
-                <button className="px-3 py-2 text-gray-600 hover:text-orange-500">Next</button>
-              </div>
             </div>
           </div>
         </div>

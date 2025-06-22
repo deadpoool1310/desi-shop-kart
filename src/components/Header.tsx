@@ -1,104 +1,115 @@
 
-import React, { useState } from 'react';
-import { Search, ShoppingCart, Heart, User, Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, User, Menu, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { user, signOut } = useAuth();
+  const { itemCount } = useCart();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      {/* Top banner */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-center py-2 text-sm">
-        🎉 Free delivery on orders above ₹499 | Monsoon Sale Live!
-      </div>
-
+    <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-3">
-          {/* Logo */}
+        {/* Top bar */}
+        <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl px-3 py-2 rounded-lg">
-              ShopIndia
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2 rounded-lg">
+              <span className="font-bold text-xl">SI</span>
             </div>
+            <span className="text-2xl font-bold text-gray-800">ShopIndia</span>
           </Link>
 
-          {/* Search Bar - Hidden on mobile */}
+          {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-2xl mx-8">
             <div className="relative w-full">
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for products, brands and more..."
-                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             </div>
           </div>
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
-              <Link to="/wishlist" className="flex items-center space-x-1 text-gray-700 hover:text-orange-500 transition-colors">
-                <Heart className="h-5 w-5" />
-                <span className="text-sm">Wishlist</span>
-              </Link>
-              <Link to="/cart" className="flex items-center space-x-1 text-gray-700 hover:text-orange-500 transition-colors relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="text-sm">Cart</span>
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-              </Link>
-              <Link to="/login" className="flex items-center space-x-1 text-gray-700 hover:text-orange-500 transition-colors">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="hidden md:block text-sm text-gray-600">
+                  Hello, {user.user_metadata?.full_name || 'User'}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="text-gray-600 hover:text-red-500"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden md:inline ml-1">Logout</span>
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login" className="flex items-center space-x-1 text-gray-600 hover:text-orange-500">
                 <User className="h-5 w-5" />
-                <span className="text-sm">Login</span>
+                <span className="hidden md:block">Login</span>
               </Link>
-            </div>
+            )}
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-gray-700 hover:text-orange-500"
-            >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <Link to="/cart" className="relative flex items-center space-x-1 text-gray-600 hover:text-orange-500">
+              <ShoppingCart className="h-5 w-5" />
+              <span className="hidden md:block">Cart</span>
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+
+            <button className="md:hidden">
+              <Menu className="h-6 w-6 text-gray-600" />
             </button>
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        <div className="md:hidden pb-3">
+        {/* Mobile search */}
+        <div className="md:hidden pb-4">
           <div className="relative">
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products..."
-              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200 py-4 animate-fade-in">
-            <div className="flex flex-col space-y-4">
-              <Link to="/wishlist" className="flex items-center space-x-2 text-gray-700 hover:text-orange-500">
-                <Heart className="h-5 w-5" />
-                <span>Wishlist</span>
-              </Link>
-              <Link to="/cart" className="flex items-center space-x-2 text-gray-700 hover:text-orange-500">
-                <ShoppingCart className="h-5 w-5" />
-                <span>Cart (3)</span>
-              </Link>
-              <Link to="/login" className="flex items-center space-x-2 text-gray-700 hover:text-orange-500">
-                <User className="h-5 w-5" />
-                <span>Login</span>
-              </Link>
-            </div>
-          </div>
-        )}
+        {/* Navigation */}
+        <nav className="hidden md:flex items-center space-x-8 py-3 border-t">
+          <Link to="/products" className="text-gray-600 hover:text-orange-500 font-medium">
+            All Products
+          </Link>
+          <Link to="/products?category=electronics" className="text-gray-600 hover:text-orange-500">
+            Electronics
+          </Link>
+          <Link to="/products?category=fashion" className="text-gray-600 hover:text-orange-500">
+            Fashion
+          </Link>
+          <Link to="/products?category=home" className="text-gray-600 hover:text-orange-500">
+            Home & Kitchen
+          </Link>
+          <Link to="/products?category=groceries" className="text-gray-600 hover:text-orange-500">
+            Groceries
+          </Link>
+        </nav>
       </div>
     </header>
   );
